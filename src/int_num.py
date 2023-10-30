@@ -11,7 +11,7 @@ def _print_nonconvergence_warning():
 
 
 def int_num(f, a, b, tol=1e-4, maxiter=1000):
-    _integrate = _basic_iter(_simpsons_rule)
+    _integrate = _basic_iter(_booles_rule)
     if b < a:
         return -_integrate(f, b, a, tol, maxiter)
     else:
@@ -54,8 +54,18 @@ def _trapezoidal_rule(f, a, b, segcount):
 
 
 def _simpsons_rule(f, a, b, segcount):
-    h = (b - a) / segcount / 2
-    xs = [a + i * h for i in range((segcount * 2) + 1)]
+    segcount *= 2
+    h = (b - a) / segcount
+    xs = [a + i * h for i in range(segcount + 1)]
     area = sum((f(xs[i + 0]) + 4 * f(xs[i + 1]) + f(xs[i + 2])) for i in
-               range(0, segcount * 2, 2)) * h / 3
+               range(0, segcount, 2)) * h / 3
+    return area
+
+
+def _booles_rule(f, a, b, segcount):
+    segcount *= 4
+    h = (b - a) / segcount
+    xs = [a + i * h for i in range(segcount + 1)]
+    area = sum((7 * f(xs[i]) + 32 * f(xs[i + 1]) + 12 * f(xs[i + 2]) + 32 * f(xs[i + 3]) +
+                7 * f(xs[i + 4])) for i in range(0, segcount, 4)) * h * 2 / 45
     return area
