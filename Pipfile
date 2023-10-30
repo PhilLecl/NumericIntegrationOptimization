@@ -10,6 +10,9 @@ pytest = "*"
 scipy = "*"
 numpy = "*"
 pytest-benchmark = {extras = ["histogram"], version = "*"}
+matplotlib = "*"
+seaborn = "*"
+pandas = "*"
 
 [requires]
 python_version = "3.11"
