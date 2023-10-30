@@ -1,4 +1,5 @@
 import math
+from functools import lru_cache
 
 
 def _print_nonconvergence_warning():
@@ -19,11 +20,11 @@ def int_num(f, a, b, tol=1e-4, maxiter=1000):
 
 def _rechteck(f, a, b, tol, maxiter):
     segcount = 4
-    area = _rechtecksformel(f, a, b, segcount - 1)
+    area = _rechtecksformel(f, a, b, segcount)
     for iteration in range(maxiter):
         old_area = area
         segcount *= 2
-        area = _rechtecksformel(f, a, b, segcount - 1)
+        area = _rechtecksformel(f, a, b, segcount)
         if abs(area - old_area) <= tol:
             break
     if iteration == maxiter - 1:
