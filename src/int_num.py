@@ -11,7 +11,7 @@ def _print_nonconvergence_warning():
 
 
 def int_num(f, a, b, tol=1e-4, maxiter=1000):
-    _integrate = _basic_iter(_rectangle_rule)
+    _integrate = _cachef(_basic_iter(_simpsons_rule))
     if b < a:
         return -_integrate(f, b, a, tol, maxiter)
     else:
@@ -35,6 +35,14 @@ def _basic_iter(calc_area, init_segcount=4):
     return wrapper
 
 
+def _cachef(func):
+    def wrapper(f, *args):
+        f = lru_cache(maxsize=None)(f)
+        return func(f, *args)
+
+    return wrapper
+
+
 def _rectangle_rule(f, a, b, segcount):
     segwidth = (b - a) / segcount
     xs = [a + (i + 0.5) * segwidth for i in range(segcount)]
@@ -46,4 +54,18 @@ def _trapezoidal_rule(f, a, b, segcount):
     segwidth = (b - a) / segcount
     xs = [a + i * segwidth for i in range(segcount + 1)]
     area = sum((f(xs[i]) + f(xs[i + 1])) for i in range(segcount)) * segwidth / 2
+    return area
+
+
+def _simpsons_rule(f, a, b, segcount):
+    segwidth = (b - a) / segcount
+    xs = [a + i * segwidth for i in range(segcount + 1)]
+    area = sum(_simpson_segment(f, xs[i], xs[i + 1]) for i in range(segcount))
+    return area
+
+
+def _simpson_segment(f, a, b):
+    h = (b - a) / 2
+    xs = [a + i * h for i in range(3)]
+    area = (f(xs[0]) + 4 * f(xs[1]) + f(xs[2])) * h / 3
     return area
