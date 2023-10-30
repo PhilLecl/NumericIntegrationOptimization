@@ -11,7 +11,7 @@ def _print_nonconvergence_warning():
 
 
 def int_num(f, a, b, tol=1e-4, maxiter=1000):
-    _integrate = _basic_iter(_rechtecksformel)
+    _integrate = _basic_iter(_rectangle_rule)
     if b < a:
         return -_integrate(f, b, a, tol, maxiter)
     else:
@@ -35,14 +35,14 @@ def _basic_iter(calc_area, init_segcount=4):
     return wrapper
 
 
-def _rechtecksformel(f, a, b, segcount):
+def _rectangle_rule(f, a, b, segcount):
     segwidth = (b - a) / segcount
     xs = [a + (i + 0.5) * segwidth for i in range(segcount)]
     area = sum(f(xs[i]) for i in range(segcount)) * segwidth
     return area
 
 
-def _trapezregel(f, a, b, segcount):
+def _trapezoidal_rule(f, a, b, segcount):
     segwidth = (b - a) / segcount
     xs = [a + i * segwidth for i in range(segcount + 1)]
     area = sum((f(xs[i]) + f(xs[i + 1])) for i in range(segcount)) * segwidth / 2
