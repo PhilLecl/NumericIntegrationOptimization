@@ -2,7 +2,7 @@ import pytest
 import math
 from scipy import integrate
 from src.int_num import int_num
-from tests.functions import psi_harm, psi_harm_sq
+from tests.functions import psi_harm, psi_harm_sq, pyexp
 
 
 @pytest.mark.parametrize(('f', 'a', 'b', 'tol', 'maxiter'), [
@@ -18,6 +18,7 @@ from tests.functions import psi_harm, psi_harm_sq
     (math.exp, 0, -10, 1e-8, 1000),
     (math.exp, 0, 10, 1e-8, 1000),
     (math.exp, -10, 10, 1e-4, 1000),
+    (pyexp, 0, 10, 1e-8, 1000),
 ])
 def test_int_num(benchmark, f, a, b, tol, maxiter):
     my_result = benchmark(int_num, f, a, b, tol, maxiter)
