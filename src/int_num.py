@@ -11,11 +11,15 @@ def _print_nonconvergence_warning():
 
 
 def int_num(f, a, b, tol=1e-4, maxiter=1000):
-    _integrate = _cachef(_basic_iter(_simpsons_rule))
+    _integrate = _basic_iter(_simpsons_rule)
     if b < a:
         return -_integrate(f, b, a, tol, maxiter)
     else:
         return _integrate(f, a, b, tol, maxiter)
+
+
+def int_num_cachedf(f, a, b, tol=1e-4, maxiter=1000):
+    return int_num(lru_cache(maxsize=None)(f), a, b, tol, maxiter)
 
 
 def _basic_iter(calc_area, init_segcount=4):
@@ -31,14 +35,6 @@ def _basic_iter(calc_area, init_segcount=4):
         if iteration == maxiter - 1:
             _print_nonconvergence_warning()
         return area
-
-    return wrapper
-
-
-def _cachef(func):
-    def wrapper(f, *args):
-        f = lru_cache(maxsize=None)(f)
-        return func(f, *args)
 
     return wrapper
 
