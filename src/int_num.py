@@ -54,14 +54,8 @@ def _trapezoidal_rule(f, a, b, segcount):
 
 
 def _simpsons_rule(f, a, b, segcount):
-    segwidth = (b - a) / segcount
-    xs = [a + i * segwidth for i in range(segcount + 1)]
-    area = sum(_simpson_segment(f, xs[i], xs[i + 1]) for i in range(segcount))
-    return area
-
-
-def _simpson_segment(f, a, b):
-    h = (b - a) / 2
-    xs = [a + i * h for i in range(3)]
-    area = (f(xs[0]) + 4 * f(xs[1]) + f(xs[2])) * h / 3
+    h = (b - a) / segcount / 2
+    xs = [a + i * h for i in range((segcount * 2) + 1)]
+    area = sum((f(xs[i + 0]) + 4 * f(xs[i + 1]) + f(xs[i + 2])) for i in
+               range(0, segcount * 2, 2)) * h / 3
     return area
