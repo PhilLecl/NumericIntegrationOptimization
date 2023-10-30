@@ -11,15 +11,15 @@ def _print_nonconvergence_warning():
 
 
 def int_num(f, a, b, tol=1e-4, maxiter=1000):
-    _integrate = _base_iter(_rechtecksformel)
+    _integrate = _basic_iter(_rechtecksformel)
     if b < a:
         return -_integrate(f, b, a, tol, maxiter)
     else:
         return _integrate(f, a, b, tol, maxiter)
 
 
-def _base_iter(calc_area, init_segcount=4):
-    def baseiter(f, a, b, tol, maxiter):
+def _basic_iter(calc_area, init_segcount=4):
+    def wrapper(f, a, b, tol, maxiter):
         segcount = init_segcount
         area = calc_area(f, a, b, segcount)
         for iteration in range(maxiter):
@@ -32,7 +32,7 @@ def _base_iter(calc_area, init_segcount=4):
             _print_nonconvergence_warning()
         return area
 
-    return baseiter
+    return wrapper
 
 
 def _rechtecksformel(f, a, b, segcount):
