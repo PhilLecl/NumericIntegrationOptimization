@@ -7,7 +7,9 @@ name = "pypi"
 
 [dev-packages]
 pytest = "*"
-pytest-benchmark = "*"
+scipy = "*"
+numpy = "*"
+pytest-benchmark = {extras = ["histogram"], version = "*"}
 
 [requires]
 python_version = "3.11"
