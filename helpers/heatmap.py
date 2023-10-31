@@ -1,3 +1,5 @@
+#! /bin/env python3
+
 import json
 import argparse
 import matplotlib.pyplot as plt
@@ -22,7 +24,7 @@ def generate_heatmap(runs: list[str], prop: str, group_by: str, color_scale: str
                   'value': float(test['stats'][prop])}])
             data = pd.concat([data, row], ignore_index=True)
     data = data.pivot(index='test', columns='run', values='value')
-
+    data.loc['sum'] = data.sum(axis=0)
     if normalize:
         data = data.apply(lambda x: x / x.min(), axis=1)
 
