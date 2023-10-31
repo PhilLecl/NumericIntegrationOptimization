@@ -1,9 +1,8 @@
 import pytest
 import math
 from scipy import integrate
-from src.int_num import int_num, int_num_cachedf
+from fastnumint import int_num, int_num_cachedf
 from tests.functions import psi_harm, psi_harm_sq, pyexp
-from functools import lru_cache
 
 TEST_CASES = (('f', 'a', 'b', 'tol', 'maxiter'), [
     (psi_harm, -5, 5, 1e-8, 1000),
