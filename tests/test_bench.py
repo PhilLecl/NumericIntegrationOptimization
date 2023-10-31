@@ -18,6 +18,10 @@ TEST_CASES = (('f', 'a', 'b', 'tol', 'maxiter'), [
     (math.exp, 0, 10, 1e-8, 1000),
     (math.exp, -10, 10, 1e-4, 1000),
     (pyexp, 0, 10, 1e-8, 1000),
+    (math.sin, 0, math.pi, 1e-8, 1000),
+    (math.cos, 0, math.pi, 1e-8, 1000),
+    (math.sin, 0, 2 * math.pi, 1e-8, 1000),
+    (math.cos, 0, 2 * math.pi, 1e-8, 1000),
 ])
 
 
