@@ -1,10 +1,11 @@
-from .iter import basic_iter
+from .iter import *
 from .newton_cotes import *
+from .gauss_quadrature import *
 from functools import lru_cache
 
 
 def int_num(f, a, b, tol=1e-4, maxiter=1000):
-    _integrate = basic_iter(booles_rule)
+    _integrate = composite_iter(gauss_quadrature)
     if b < a:
         return -_integrate(f, b, a, tol, maxiter)
     else:
