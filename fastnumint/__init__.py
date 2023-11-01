@@ -1,10 +1,10 @@
 from .iter import basic_iter
-from .newton_cotes import _booles_rule, _simpsons_rule, _rectangle_rule
+from .newton_cotes import *
 from functools import lru_cache
 
 
 def int_num(f, a, b, tol=1e-4, maxiter=1000):
-    _integrate = basic_iter(_booles_rule)
+    _integrate = basic_iter(booles_rule)
     if b < a:
         return -_integrate(f, b, a, tol, maxiter)
     else:
