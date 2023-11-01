@@ -5,11 +5,9 @@ from functools import lru_cache
 
 
 def int_num(f, a, b, tol=1e-4, maxiter=1000):
-    _integrate = composite_iter(gauss_quadrature)
     if b < a:
-        return -_integrate(f, b, a, tol, maxiter)
-    else:
-        return _integrate(f, a, b, tol, maxiter)
+        return -int_num(f, b, a, tol, maxiter)
+    return composite_iter(gauss_legendre)(f, a, b, tol, maxiter)
 
 
 def int_num_cachedf(f, a, b, tol=1e-4, maxiter=1000):
