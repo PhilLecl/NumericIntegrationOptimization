@@ -1,6 +1,6 @@
 from .iter import *
 from .newton_cotes import *
-from .gauss_quadrature import *
+from fastnumint.gauss_quadrature import *
 from functools import lru_cache
 
 
