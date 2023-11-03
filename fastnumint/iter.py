@@ -10,14 +10,13 @@ def basic_iter(calc_area, init_segcount=4):
     def wrapper(f, a, b, tol, maxiter):
         segcount = init_segcount
         area = calc_area(f, a, b, segcount)
-        for iteration in range(maxiter):
+        for _ in range(maxiter):
             old_area = area
             segcount *= 2
             area = calc_area(f, a, b, segcount)
             if abs(area - old_area) <= tol:
-                break
-        if iteration == maxiter - 1:
-            print_nonconvergence_warning()
+                return area
+        print_nonconvergence_warning()
         return area
 
     return wrapper
@@ -27,14 +26,13 @@ def composite_iter(calc_area, init_segcount=1):
     def wrapper(f, a, b, tol, maxiter):
         segcount = init_segcount
         area = _composite(calc_area, segcount)(f, a, b)
-        for iteration in range(maxiter):
+        for _ in range(maxiter):
             old_area = area
             segcount *= 2
             area = _composite(calc_area, segcount)(f, a, b)
             if abs(area - old_area) <= tol:
-                break
-        if iteration == maxiter - 1:
-            print_nonconvergence_warning()
+                return area
+        print_nonconvergence_warning()
         return area
 
     return wrapper
