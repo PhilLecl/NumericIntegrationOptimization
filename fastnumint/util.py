@@ -1,3 +1,14 @@
+def orderab(func):
+    """Ensures that a<=b."""
+
+    def wrapper(f, a, b, tol, maxiter):
+        if b < a:
+            return -wrapper(f, b, a, tol, maxiter)
+        return func(f, a, b, tol, maxiter)
+
+    return wrapper
+
+
 def print_nonconvergence_warning():
     print('----------------------------------')
     print('   WARNING: maxiter was reached   ')
