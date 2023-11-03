@@ -1,12 +1,22 @@
 from ..util import print_nonconvergence_warning
 
 
-def gauss_kronrod(f, a, b, kronrod_degree):
+def gauss_kronrod(f, a, b, n):
+    """
+    Integrates `f` from `a` to `b` and estimates the error
+    using `n`-point Gauss-Kronrod quadrature.
+
+    :param f: The function to be integrated
+    :param a: The lower end of the integration interval
+    :param b: The upper end of the integration interval
+    :param n: The number of points where f is evaluated
+    :return: A tuple (a, b, integral_estimate, error_estimate)
+    """
     scaling = (b - a) / 2
     midpoint = (a + b) / 2
-    nodes = [f(scaling * x + midpoint) for x, _, _ in roots[kronrod_degree]]
-    gauss = sum(n * wg for n, (_, _, wg) in zip(nodes, roots[kronrod_degree]) if wg) * scaling
-    kronrod = sum(n * wk for n, (_, wk, _) in zip(nodes, roots[kronrod_degree])) * scaling
+    nodes = [f(scaling * x + midpoint) for x, _, _ in _roots[n]]
+    gauss = sum(fx * wg for fx, (_, _, wg) in zip(nodes, _roots[n]) if wg) * scaling
+    kronrod = sum(fx * wk for fx, (_, wk, _) in zip(nodes, _roots[n])) * scaling
     return a, b, kronrod, abs(kronrod - gauss)
 
 
@@ -37,7 +47,7 @@ def local_adaptive_gauss_kronrod(f, a, b, tol, maxiter, n=15):
 
 
 # taken from: https://www.advanpix.com/2011/11/07/gauss-kronrod-quadrature-nodes-weights/
-roots = {
+_roots = {
     # kronrod_degree: [
     #     (x, kronrod_weight, gauss_weight),
     #     ...
