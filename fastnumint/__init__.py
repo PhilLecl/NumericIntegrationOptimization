@@ -1,10 +1,11 @@
-from .util import orderab
-from .gauss_quadrature.gauss_kronrod import global_adaptive as global_adaptive_gauss_kronrod
+from .gauss_quadrature.gauss_kronrod import global_adaptive as gagk, local_adaptive as lagk
+from .gauss_quadrature.gauss_legendre import iterative as igl, local_adaptive as lagl
+from .newton_cotes import *
 from functools import lru_cache
 
 
 def int_num(f, a, b, tol=1e-4, maxiter=1000):
-    return orderab(global_adaptive_gauss_kronrod(15))(f, a, b, tol, maxiter)
+    return gagk()(f, a, b, tol, maxiter)
 
 
 def int_num_cachedf(f, a, b, tol=1e-4, maxiter=1000):

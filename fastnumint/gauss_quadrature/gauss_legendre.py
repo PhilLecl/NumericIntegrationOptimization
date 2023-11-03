@@ -1,4 +1,4 @@
-from ..util import composite_iter
+from ..util import composite_iter, orderab
 from functools import partial
 
 
@@ -10,7 +10,7 @@ def gauss_legendre(f, a, b, n=5):
 
 
 def iterative(n=5):
-    return composite_iter()(partial(gauss_legendre, n=n))
+    return orderab(composite_iter()(partial(gauss_legendre, n=n)))
 
 
 def _agl(f, a, b, n, whole, tol, maxdepth):
@@ -26,8 +26,12 @@ def _agl(f, a, b, n, whole, tol, maxdepth):
             _agl(f, (a + b) / 2, b, n, right, tol / 2, maxdepth - 1)
 
 
-def local_adaptive(f, a, b, tol, maxdepth, n=5):
-    return _agl(f, a, b, n, gauss_legendre(f, a, b, n), tol, maxdepth - 1)
+def local_adaptive(n=5):
+    @orderab
+    def inner(f, a, b, tol, maxdepth):
+        return _agl(f, a, b, n, gauss_legendre(f, a, b, n), tol, maxdepth - 1)
+
+    return inner
 
 
 # taken from https://pomax.github.io/bezierinfo/legendre-gauss.html

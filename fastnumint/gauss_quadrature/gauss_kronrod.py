@@ -1,6 +1,6 @@
 from functools import partial
 
-from ..util import local_adaptive as mkla, global_adaptive as mkga
+from ..util import local_adaptive as mkla, global_adaptive as mkga, orderab
 
 
 def gauss_kronrod(f, a, b, n):
@@ -23,11 +23,11 @@ def gauss_kronrod(f, a, b, n):
 
 
 def global_adaptive(n=15):
-    return mkga(partial(gauss_kronrod, n=n))
+    return orderab(mkga(partial(gauss_kronrod, n=n)))
 
 
 def local_adaptive(n=15):
-    return mkla(partial(gauss_kronrod, n=n))
+    return orderab(mkla(partial(gauss_kronrod, n=n)))
 
 
 # taken from: https://www.advanpix.com/2011/11/07/gauss-kronrod-quadrature-nodes-weights/

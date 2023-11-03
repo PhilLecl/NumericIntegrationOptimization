@@ -1,8 +1,9 @@
 from itertools import chain, islice, cycle, repeat
-from .util import basic_iter
+from .util import basic_iter, orderab
 
 
-@basic_iter
+@orderab
+@basic_iter()
 def rectangle_rule(f, a, b, segcount):
     segwidth = (b - a) / segcount
     xs = (a + (i + 0.5) * segwidth for i in range(segcount))
@@ -10,7 +11,8 @@ def rectangle_rule(f, a, b, segcount):
     return area
 
 
-@basic_iter
+@orderab
+@basic_iter()
 def trapezoidal_rule(f, a, b, segcount):
     segwidth = (b - a) / segcount
     xs = (a + i * segwidth for i in range(segcount + 1))
@@ -19,7 +21,8 @@ def trapezoidal_rule(f, a, b, segcount):
     return area
 
 
-@basic_iter
+@orderab
+@basic_iter()
 def simpsons_rule(f, a, b, segcount):
     segcount *= 2
     h = (b - a) / segcount
@@ -29,7 +32,8 @@ def simpsons_rule(f, a, b, segcount):
     return area
 
 
-@basic_iter
+@orderab
+@basic_iter()
 def booles_rule(f, a, b, segcount):
     segcount *= 4
     h = (b - a) / segcount
@@ -57,6 +61,7 @@ def _asr(f, a, fa, m, fm, b, fb, whole, tol, maxdepth):
         _asr(f, m, fm, rm, frm, b, fb, right, tol / 2, maxdepth - 1)
 
 
+@orderab
 def local_adaptive_simpsons_rule(f, a, b, tol, maxdepth):
     fa, fb = f(a), f(b)
     m, fm, whole = _simpson(f, a, fa, b, fb)
