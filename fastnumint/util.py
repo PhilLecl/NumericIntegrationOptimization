@@ -16,7 +16,6 @@ def basic_iter(init_segcount=4):
     or the error is estimated to be below `tol`.
 
     :param init_segcount: The initial number of segments.
-    :return:
     """
 
     def decorator(func):
@@ -46,7 +45,6 @@ def composite_iter(init_segcount=1):
     or the error is estimated to be below `tol`.
 
     :param init_segcount: The initial number of segments.
-    :return:
     """
 
     def decorator(func):
@@ -86,3 +84,56 @@ def _segment(segcount=2):
         return wrapper
 
     return decorator
+
+
+def local_adaptive(integrate):
+    """
+    A decorator for making a function locally adaptive.
+    Takes a function `integrate: (f, a, b)->(a, b, integral_estimate, error_estimate)`
+    that integrates `f` from `a` to `b`
+    and returns `a`, `b` and estimates for the integral and error.
+    Constructs a function `(f, a, b, tol, maxdepth)->float` that integrates `f` from `a` to `b`
+    by bisecting each segment until its tolerance is low enough
+    or a maximum recursion depth is reached.
+    The resulting integral should have an error `<=tol`
+    """
+
+    def wrapper(f, a, b, tol, maxdepth):
+        _, _, whole, err = integrate(f, a, b)
+        if not maxdepth or err <= tol:
+            return whole
+        m = (a + b) / 2
+        return wrapper(f, a, m, tol / 2, maxdepth - 1) + \
+            wrapper(f, m, b, tol / 2, maxdepth - 1)
+
+    return wrapper
+
+
+def global_adaptive(integrate):
+    """
+    A decorator for making a function globally adaptive.
+    Takes a function `integrate: (f, a, b)->(a, b, integral_estimate, error_estimate)`
+    that integrates `f` from `a` to `b`
+    and returns `a`, `b` and estimates for the integral and error.
+    Constructs a function `(f, a, b, tol, maxiter)->float` that integrates `f` from `a` to `b`
+    by iteratively bisecting the segment with the largest error-estimate
+    until the sum of error-estimates is `<=tol` or `maxiter` iterations have been reached.
+    """
+
+    def wrapper(f, a, b, tol, maxiter):
+        segments = [integrate(f, a, b)]
+        for i in range(maxiter):
+            if sum(e for (a, b, segint, e) in segments) <= tol:
+                return sum(segint for (a, b, segint, e) in segments)
+
+            # bisect the segment with the largest error
+            i, (a, b, segint, e) = max(enumerate(segments), key=lambda el: el[1][3])
+            m = (a + b) / 2
+            segments = segments[:i] + [integrate(f, a, m)] + [integrate(f, m, b)] + segments[
+                                                                                    i + 1:]
+
+        if sum(e for (a, b, segint, e) in segments) > tol:
+            print_nonconvergence_warning()
+        return sum(segint for (a, b, segint, e) in segments)
+
+    return wrapper

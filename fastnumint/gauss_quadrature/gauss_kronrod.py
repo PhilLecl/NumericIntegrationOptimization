@@ -1,4 +1,6 @@
-from ..util import print_nonconvergence_warning
+from functools import partial
+
+from ..util import local_adaptive as mkla, global_adaptive as mkga
 
 
 def gauss_kronrod(f, a, b, n):
@@ -20,30 +22,12 @@ def gauss_kronrod(f, a, b, n):
     return a, b, kronrod, abs(kronrod - gauss)
 
 
-def global_adaptive_gauss_kronrod(f, a, b, tol, maxiter, n=15):
-    segments = [gauss_kronrod(f, a, b, n)]
-    for i in range(maxiter):
-        if sum(e for (a, b, segint, e) in segments) <= tol:
-            return sum(segint for (a, b, segint, e) in segments)
-
-        # bisect the segment with the largest error
-        i, (a, b, segint, e) = max(enumerate(segments), key=lambda el: el[1][3])
-        m = (a + b) / 2
-        segments = segments[:i] + [gauss_kronrod(f, a, m, n)] + \
-                   [gauss_kronrod(f, m, b, n)] + segments[i + 1:]
-
-    if sum(e for (a, b, segint, e) in segments) > tol:
-        print_nonconvergence_warning()
-    return sum(segint for (a, b, segint, e) in segments)
+def global_adaptive(n=15):
+    return mkga(partial(gauss_kronrod, n=n))
 
 
-def local_adaptive_gauss_kronrod(f, a, b, tol, maxiter, n=15):
-    _, _, whole, err = gauss_kronrod(f, a, b, n)
-    if not maxiter or err <= tol:
-        return whole
-    m = (a + b) / 2
-    return local_adaptive_gauss_kronrod(f, a, m, tol / 2, maxiter - 1, n) + \
-        local_adaptive_gauss_kronrod(f, m, b, tol / 2, maxiter - 1, n)
+def local_adaptive(n=15):
+    return mkla(partial(gauss_kronrod, n=n))
 
 
 # taken from: https://www.advanpix.com/2011/11/07/gauss-kronrod-quadrature-nodes-weights/
