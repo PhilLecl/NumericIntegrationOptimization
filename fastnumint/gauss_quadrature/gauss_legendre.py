@@ -1,3 +1,35 @@
+from ..util import composite_iter
+from functools import partial
+
+
+def gauss_legendre(f, a, b, n=5):
+    scaling = (b - a) / 2
+    midpoint = (a + b) / 2
+    return sum(
+        f(scaling * xi + midpoint) * wi for xi, wi in zip(abscissae[n], weights[n])) * scaling
+
+
+def iterative_gauss_legendre(n=5):
+    return composite_iter()(partial(gauss_legendre, n=n))
+
+
+def _agl(f, a, b, n, whole, tol, maxdepth):
+    if not maxdepth:
+        return whole
+    left = gauss_legendre(f, a, (a + b) / 2, n)
+    right = gauss_legendre(f, (a + b) / 2, b, n)
+    delta = left + right - whole
+    if abs(delta) <= tol:
+        return left + right
+    else:
+        return _agl(f, a, (a + b) / 2, n, left, tol / 2, maxdepth - 1) + \
+            _agl(f, (a + b) / 2, b, n, right, tol / 2, maxdepth - 1)
+
+
+def local_adaptive_gauss_legendre(f, a, b, tol, maxdepth, n=5):
+    return _agl(f, a, b, n, gauss_legendre(f, a, b, n), tol, maxdepth - 1)
+
+
 # taken from https://pomax.github.io/bezierinfo/legendre-gauss.html
 abscissae = {2: (
     -0.5773502691896257645091487805019574556476017512701268760186023264839776723029333456937153955857495252252087138051355676766566483649996508262705518373647912161760310773007685273559916067003615583077550051041144223011076288835574182229739459904090157105534559538626730166621791266197964892168,

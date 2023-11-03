@@ -1,6 +1,8 @@
 from itertools import chain, islice, cycle, repeat
+from .util import basic_iter
 
 
+@basic_iter
 def rectangle_rule(f, a, b, segcount):
     segwidth = (b - a) / segcount
     xs = (a + (i + 0.5) * segwidth for i in range(segcount))
@@ -8,6 +10,7 @@ def rectangle_rule(f, a, b, segcount):
     return area
 
 
+@basic_iter
 def trapezoidal_rule(f, a, b, segcount):
     segwidth = (b - a) / segcount
     xs = (a + i * segwidth for i in range(segcount + 1))
@@ -16,6 +19,7 @@ def trapezoidal_rule(f, a, b, segcount):
     return area
 
 
+@basic_iter
 def simpsons_rule(f, a, b, segcount):
     segcount *= 2
     h = (b - a) / segcount
@@ -25,6 +29,7 @@ def simpsons_rule(f, a, b, segcount):
     return area
 
 
+@basic_iter
 def booles_rule(f, a, b, segcount):
     segcount *= 4
     h = (b - a) / segcount
