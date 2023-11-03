@@ -45,8 +45,3 @@ def test_int_num(benchmark, f, a, b, tol, maxiter):
     my_result = benchmark(int_num, f, a, b, tol, maxiter)
     scipy_result = integrate.quad(f, a, b)
     assert abs(my_result - scipy_result[0]) <= tol
-
-
-@pytest.mark.parametrize(*TEST_CASES)
-def test_cached(benchmark, f, a, b, tol, maxiter):
-    benchmark(int_num_cachedf, f, a, b, tol, maxiter)

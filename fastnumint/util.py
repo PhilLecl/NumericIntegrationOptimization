@@ -1,10 +1,22 @@
+from functools import lru_cache
+
+
 def orderab(func):
     """Ensures that a<=b."""
 
-    def wrapper(f, a, b, tol, maxiter):
+    def wrapper(f, a, b, *args, **kwargs):
         if b < a:
-            return -wrapper(f, b, a, tol, maxiter)
-        return func(f, a, b, tol, maxiter)
+            return -func(f, b, a, *args, **kwargs)
+        return func(f, a, b, *args, **kwargs)
+
+    return wrapper
+
+
+def cachedf(func):
+    """Makes f cached."""
+
+    def wrapper(f, *args, **kwargs):
+        return func(lru_cache(maxsize=None)(f), *args, **kwargs)
 
     return wrapper
 
