@@ -1,4 +1,5 @@
 from functools import lru_cache
+from bisect import insort
 
 
 def orderab(func):
@@ -145,15 +146,17 @@ def global_adaptive(integrate):
 
     def wrapper(f, a, b, tol, maxiter):
         segments = [integrate(f, a, b)]
+        by_error = lambda e: e[3]
         for i in range(maxiter):
             if sum(e for (a, b, segint, e) in segments) <= tol:
                 return sum(segint for (a, b, segint, e) in segments)
 
-            # bisect the segment with the largest error
-            i, (a, b, segint, e) = max(enumerate(segments), key=lambda el: el[1][3])
+            # bisect the segment with the largest error (the last segment)
+            # and insert the new segments at the appropriate places
+            a, b, _, _ = segments.pop(-1)
             m = (a + b) / 2
-            segments = segments[:i] + [integrate(f, a, m)] + [integrate(f, m, b)] + segments[
-                                                                                    i + 1:]
+            insort(segments, integrate(f, a, m), key=by_error)
+            insort(segments, integrate(f, m, b), key=by_error)
 
         if sum(e for (a, b, segint, e) in segments) > tol:
             print_nonconvergence_warning()
