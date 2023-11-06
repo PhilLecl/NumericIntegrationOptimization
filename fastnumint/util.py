@@ -143,13 +143,14 @@ def global_adaptive(integrate):
     by iteratively bisecting the segment with the largest error-estimate
     until the sum of error-estimates is `<=tol` or `maxiter` iterations have been reached.
     """
+    by_integral = lambda e: e[2]
+    by_error = lambda e: e[3]
 
     def wrapper(f, a, b, tol, maxiter):
-        by_error = lambda e: e[3]
         segments = [(a, b, *integrate(f, a, b))]
         for i in range(maxiter):
-            if sum(e for (a, b, segint, e) in segments) <= tol:
-                return sum(segint for (a, b, segint, e) in segments)
+            if sum(map(by_error, segments)) <= tol:
+                return sum(map(by_integral, segments))
 
             # bisect the segment with the largest error (the last segment)
             # and insert the new segments at the appropriate places
@@ -158,8 +159,8 @@ def global_adaptive(integrate):
             insort(segments, (a, m, *integrate(f, a, m)), key=by_error)
             insort(segments, (m, b, *integrate(f, m, b)), key=by_error)
 
-        if sum(e for (a, b, segint, e) in segments) > tol:
+        if sum(map(by_error, segments)) > tol:
             print_nonconvergence_warning()
-        return sum(segint for (a, b, segint, e) in segments)
+        return sum(map(by_integral, segments))
 
     return wrapper
