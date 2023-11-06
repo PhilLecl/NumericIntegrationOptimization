@@ -30,13 +30,11 @@ MY_TESTS = (('f', 'a', 'b', 'tol', 'maxiter'), (
     (p2, -1, 1, 1e-8, 1000),
     (p3, -1, 1, 1e-8, 1000),
     (p4, -1, 1, 1e-8, 1000),
-    (p50, -1, 1, 1e-8, 1000),
     (p0, 0, -4, 1e-8, 1000),
     (p1, 0, -4, 1e-8, 1000),
     (p2, 0, -4, 1e-8, 1000),
     (p3, 0, -4, 1e-8, 1000),
     (p4, 0, -4, 1e-8, 1000),
-    (p50, 0, -1, 1e-8, 1000)
 ))
 
 
@@ -62,6 +60,17 @@ def test_tan(benchmark):
     my_result = benchmark(int_num, f, a, b, tol, maxiter)
     solution = 0
     assert abs(my_result - solution) <= tol
+
+
+@pytest.mark.parametrize(('f', 'a', 'b', 'tol', 'maxiter'), (
+        (p50, -1, 1, 1e-8, 1000),
+        (p50, 0, -1, 1e-8, 1000)
+))
+def test_p50(benchmark, f, a, b, tol, maxiter):
+    """Polynomial of degree 50 as edge case because it's a rare application."""
+    my_result = benchmark(int_num, f, a, b, tol, maxiter)
+    scipy_result = integrate.quad(f, a, b)
+    assert abs(my_result - scipy_result[0]) <= tol
 
 
 @pytest.mark.parametrize(*DE_DONCKER_TESTS)
