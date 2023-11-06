@@ -71,7 +71,7 @@ def test_challenging():
     Not benchmarked, because it's pretty slow already.
     """
     f = lambda x: math.cos(math.log(x) / x) / x
-    a, b, tol, maxiter = 0, 1, 1e-8, 10 ** 4
+    a, b, tol, maxiter = 0, 1, 1e-8, 10 ** 5
     my_result = int_num(f, a, b, tol, maxiter)
-    scipy_result = integrate.quad(f, a, b, limit=maxiter)
-    assert abs(my_result - scipy_result[0]) <= tol
+    solution = 0.323367431677778761399370087952170446651046625725469661681036443
+    assert abs(my_result - solution) <= tol
