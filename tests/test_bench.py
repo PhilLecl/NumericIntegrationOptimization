@@ -1,7 +1,6 @@
 import pytest
-import math
 from scipy import integrate
-from fastnumint import *
+from fastnumint import int_num
 from tests.functions import *
 from .de_doncker import TEST_CASES as DE_DONCKER_TESTS
 
