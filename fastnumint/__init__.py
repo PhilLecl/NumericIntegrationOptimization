@@ -4,4 +4,4 @@ from .newton_cotes import *
 
 
 def int_num(f, a, b, tol=1e-4, maxiter=1000):
-    return gagk()(f, a, b, tol, maxiter)
+    return gagk(21)(f, a, b, tol, maxiter)
