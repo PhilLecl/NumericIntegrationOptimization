@@ -2,14 +2,14 @@ from ..util import composite_iter, orderab
 from functools import partial
 
 
-def gauss_legendre(f, a, b, n=5):
+def gauss_legendre(f, a, b, n):
     scaling = (b - a) / 2
     midpoint = (a + b) / 2
     return sum(
         f(scaling * xi + midpoint) * wi for xi, wi in zip(_abscissae[n], _weights[n])) * scaling
 
 
-def iterative(n=5):
+def iterative(n):
     return orderab(composite_iter()(partial(gauss_legendre, n=n)))
 
 
@@ -26,7 +26,7 @@ def _agl(f, a, b, n, whole, tol, maxdepth):
             _agl(f, (a + b) / 2, b, n, right, tol / 2, maxdepth - 1)
 
 
-def local_adaptive(n=5):
+def local_adaptive(n):
     @orderab
     def inner(f, a, b, tol, maxdepth):
         return _agl(f, a, b, n, gauss_legendre(f, a, b, n), tol, maxdepth - 1)

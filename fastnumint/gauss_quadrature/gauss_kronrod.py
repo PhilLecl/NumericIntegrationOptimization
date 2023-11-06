@@ -22,11 +22,11 @@ def gauss_kronrod(f, a, b, n):
     return kronrod, abs(kronrod - gauss)
 
 
-def global_adaptive(n=15):
+def global_adaptive(n):
     return orderab(mkga(partial(gauss_kronrod, n=n)))
 
 
-def local_adaptive(n=15):
+def local_adaptive(n):
     return orderab(mkla(partial(gauss_kronrod, n=n)))
 
 
