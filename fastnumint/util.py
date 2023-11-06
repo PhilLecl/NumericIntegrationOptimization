@@ -123,7 +123,7 @@ def local_adaptive(integrate):
     """
 
     def wrapper(f, a, b, tol, maxdepth):
-        _, _, whole, err = integrate(f, a, b)
+        whole, err = integrate(f, a, b)
         if not maxdepth or err <= tol:
             return whole
         m = (a + b) / 2
@@ -145,8 +145,8 @@ def global_adaptive(integrate):
     """
 
     def wrapper(f, a, b, tol, maxiter):
-        segments = [integrate(f, a, b)]
         by_error = lambda e: e[3]
+        segments = [(a, b, *integrate(f, a, b))]
         for i in range(maxiter):
             if sum(e for (a, b, segint, e) in segments) <= tol:
                 return sum(segint for (a, b, segint, e) in segments)
@@ -155,8 +155,8 @@ def global_adaptive(integrate):
             # and insert the new segments at the appropriate places
             a, b, _, _ = segments.pop()
             m = (a + b) / 2
-            insort(segments, integrate(f, a, m), key=by_error)
-            insort(segments, integrate(f, m, b), key=by_error)
+            insort(segments, (a, m, *integrate(f, a, m)), key=by_error)
+            insort(segments, (m, b, *integrate(f, m, b)), key=by_error)
 
         if sum(e for (a, b, segint, e) in segments) > tol:
             print_nonconvergence_warning()

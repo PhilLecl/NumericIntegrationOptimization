@@ -19,7 +19,7 @@ def gauss_kronrod(f, a, b, n):
     nodes = [f(scaling * x + midpoint) for x, _, _ in _roots[n]]
     gauss = sum(fx * wg for fx, (_, _, wg) in zip(nodes, _roots[n]) if wg) * scaling
     kronrod = sum(fx * wk for fx, (_, wk, _) in zip(nodes, _roots[n])) * scaling
-    return a, b, kronrod, abs(kronrod - gauss)
+    return kronrod, abs(kronrod - gauss)
 
 
 def global_adaptive(n=15):
