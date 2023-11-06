@@ -1,6 +1,8 @@
 from functools import lru_cache
 from bisect import insort
 
+from .wynn_epsilon import WynnEpsilon
+
 
 def orderab(func):
     """Ensures that a<=b."""
@@ -166,7 +168,7 @@ def global_adaptive(integrate):
     return wrapper
 
 
-def global_adaptive2(integrate):
+def global_adaptive_wynn(integrate):
     by_integral = lambda e: e[2]
     by_error = lambda e: e[3]
 
@@ -177,28 +179,36 @@ def global_adaptive2(integrate):
 
     def wrapper(f, a, b, tol, maxiter):
         iteration = level = 0
+        wynn = WynnEpsilon()
         segments = [(a, b, *integrate(f, a, b), level)]
         while sum(map(by_error, segments)) > tol:
-            iteration += 1
-            if iteration > maxiter:
+            if iteration >= maxiter:
                 print_nonconvergence_warning()
                 break
 
-            a, b, _, _, lvl = segments.pop()
-            if lvl == level:
+            a, b, _, _, lvl = segments[-1]
+            if lvl < level:
+                # bisect the segment with the largest error
+                del segments[-1]
+                _insort_bisected(segments, f, a, b, lvl + 1)
+                iteration += 1
+            else:
                 # the smallest segment has the largest error
                 # decrease the error of the larger segments first
                 long_segment = lambda seg: seg[4] < level
                 while iteration < maxiter and sum(
                         map(by_error, filter(long_segment, segments))) > tol:
-                    iteration += 1
                     # bisect the segment with the largest error among the 'long' segments
-                    la, lb, _, _, llvl = _pop_last_where(long_segment, segments)
-                    _insort_bisected(segments, f, la, lb, llvl + 1)
-                level += 1
+                    a, b, _, _, lvl = _pop_last_where(long_segment, segments)
+                    _insort_bisected(segments, f, a, b, lvl + 1)
+                    iteration += 1
 
-            # bisect the segment with the largest error
-            _insort_bisected(segments, f, a, b, lvl + 1)
+                # perform extrapolation
+                wynn.add(sum(map(by_integral, segments)))
+                if wynn.error <= tol:
+                    return wynn.extrapolation
+
+                level += 1
 
         return sum(map(by_integral, segments))
 
