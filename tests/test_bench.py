@@ -56,6 +56,14 @@ def test_custom(benchmark, f, a, b, tol, maxiter):
     assert abs(my_result - scipy_result[0]) <= tol
 
 
+def test_tan(benchmark):
+    """Tangens as a separate test case because some algorithms struggle with it."""
+    f, a, b, tol, maxiter = math.tan, -math.pi, math.pi, 1e-8, 1000
+    my_result = benchmark(int_num, f, a, b, tol, maxiter)
+    solution = 0
+    assert abs(my_result - solution) <= tol
+
+
 @pytest.mark.parametrize(*DE_DONCKER_TESTS)
 def test_de_doncker(benchmark, f, w, alpha, beta, a, b, tol, maxiter):
     """Test cases from [de Doncker 1978] (https://doi.org/10.1145/1053402.1053403)"""
