@@ -176,30 +176,30 @@ def global_adaptive2(integrate):
         insort(segments, (m, b, *integrate(f, m, b), level), key=by_error)
 
     def wrapper(f, a, b, tol, maxiter):
-        level, phase1 = 0, False
+        iteration = level = 0
         segments = [(a, b, *integrate(f, a, b), level)]
-        for i in range(maxiter):
-            if sum(map(by_error, segments)) <= tol:
-                return sum(map(by_integral, segments))
+        while sum(map(by_error, segments)) > tol:
+            iteration += 1
+            if iteration > maxiter:
+                print_nonconvergence_warning()
+                break
 
-            if phase1:
-                a, b, _, _, lvl = segments[-1]
-                if lvl == level:
-                    phase1 = False
-                else:
-                    del segments[-1]
-                    _insort_bisected(segments, f, a, b, lvl + 1)
-            else:
+            a, b, _, _, lvl = segments.pop()
+            if lvl == level:
+                # the smallest segment has the largest error
+                # decrease the error of the larger segments first
                 long_segment = lambda seg: seg[4] < level
-                if sum(map(by_error, filter(long_segment, segments))) <= tol:
-                    level += 1
-                    phase1 = True
-                else:
-                    a, b, _, _, lvl = _pop_last_where(long_segment, segments)
-                    _insort_bisected(segments, f, a, b, lvl + 1)
+                while iteration < maxiter and sum(
+                        map(by_error, filter(long_segment, segments))) > tol:
+                    iteration += 1
+                    # bisect the segment with the largest error among the 'long' segments
+                    la, lb, _, _, llvl = _pop_last_where(long_segment, segments)
+                    _insort_bisected(segments, f, la, lb, llvl + 1)
+                level += 1
 
-        if sum(map(by_error, segments)) > tol:
-            print_nonconvergence_warning()
+            # bisect the segment with the largest error
+            _insort_bisected(segments, f, a, b, lvl + 1)
+
         return sum(map(by_integral, segments))
 
     return wrapper
