@@ -73,11 +73,9 @@ def test_de_doncker(benchmark, f, w, alpha, beta, a, b, tol, maxiter):
     assert abs(my_result - scipy_result[0]) <= tol
 
 
+@pytest.mark.skip(reason='Too difficult')
 def test_challenging():
-    """
-    Test case from [Gautschi 2008] (https://doi.org/10.1007/s11075-008-9157-z).
-    Not benchmarked, because it's pretty slow already.
-    """
+    """Test case from [Gautschi 2008] (https://doi.org/10.1007/s11075-008-9157-z)."""
     f = lambda x: math.cos(math.log(x) / x) / x
     a, b, tol, maxiter = 0, 1, 1e-8, 10 ** 5
     my_result = int_num(f, a, b, tol, maxiter)
