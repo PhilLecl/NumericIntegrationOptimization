@@ -41,6 +41,7 @@ MY_TESTS = (('f', 'a', 'b', 'tol', 'maxiter'), (
 
 
 def test_original(benchmark):
+    """The test case originially supplied in the class"""
     f, a, b, tol, maxiter = psi_harm, -5, 5, 1e-8, 1000
     my_result = benchmark(int_num, f, a, b, tol, maxiter)
     scipy_result = integrate.quad(f, a, b)
@@ -49,6 +50,7 @@ def test_original(benchmark):
 
 @pytest.mark.parametrize(*MY_TESTS)
 def test_custom(benchmark, f, a, b, tol, maxiter):
+    """A couple of test cases I made up"""
     my_result = benchmark(int_num, f, a, b, tol, maxiter)
     scipy_result = integrate.quad(f, a, b)
     assert abs(my_result - scipy_result[0]) <= tol
@@ -56,7 +58,20 @@ def test_custom(benchmark, f, a, b, tol, maxiter):
 
 @pytest.mark.parametrize(*DE_DONCKER_TESTS)
 def test_de_doncker(benchmark, f, w, alpha, beta, a, b, tol, maxiter):
+    """Test cases from [de Doncker 1978] (https://doi.org/10.1145/1053402.1053403)"""
     fw = lambda x: f(x) * w(x, alpha, beta)
     my_result = benchmark(int_num, fw, a, b, tol, maxiter)
     scipy_result = integrate.quad(fw, a, b, limit=1000)
+    assert abs(my_result - scipy_result[0]) <= tol
+
+
+def test_challenging():
+    """
+    Test case from [Gautschi 2008] (https://doi.org/10.1007/s11075-008-9157-z).
+    Not benchmarked, because it's pretty slow already.
+    """
+    f = lambda x: math.cos(math.log(x) / x) / x
+    a, b, tol, maxiter = 0, 1, 1e-8, 10 ** 4
+    my_result = int_num(f, a, b, tol, maxiter)
+    scipy_result = integrate.quad(f, a, b, limit=maxiter)
     assert abs(my_result - scipy_result[0]) <= tol
