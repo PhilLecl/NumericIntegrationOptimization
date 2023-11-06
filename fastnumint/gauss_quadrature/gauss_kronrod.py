@@ -1,6 +1,7 @@
 from functools import partial
 
-from ..util import local_adaptive as mkla, global_adaptive as mkga, orderab
+from ..util import local_adaptive as mkla, global_adaptive as mkga, global_adaptive2 as mkga2, \
+    orderab
 
 
 def gauss_kronrod(f, a, b, n):
@@ -24,6 +25,10 @@ def gauss_kronrod(f, a, b, n):
 
 def global_adaptive(n):
     return orderab(mkga(partial(gauss_kronrod, n=n)))
+
+
+def global_adaptive2(n):
+    return orderab(mkga2(partial(gauss_kronrod, n=n)))
 
 
 def local_adaptive(n):

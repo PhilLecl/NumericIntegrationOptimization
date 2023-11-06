@@ -164,3 +164,47 @@ def global_adaptive(integrate):
         return sum(map(by_integral, segments))
 
     return wrapper
+
+
+def global_adaptive2(integrate):
+    by_integral = lambda e: e[2]
+    by_error = lambda e: e[3]
+
+    def _insort_bisected(segments, f, a, b, level):
+        m = (a + b) / 2
+        insort(segments, (a, m, *integrate(f, a, m), level), key=by_error)
+        insort(segments, (m, b, *integrate(f, m, b), level), key=by_error)
+
+    def wrapper(f, a, b, tol, maxiter):
+        level, phase1 = 0, False
+        segments = [(a, b, *integrate(f, a, b), level)]
+        for i in range(maxiter):
+            if sum(map(by_error, segments)) <= tol:
+                return sum(map(by_integral, segments))
+
+            if phase1:
+                a, b, _, _, lvl = segments[-1]
+                if lvl == level:
+                    phase1 = False
+                else:
+                    del segments[-1]
+                    _insort_bisected(segments, f, a, b, lvl + 1)
+            else:
+                long_segment = lambda seg: seg[4] < level
+                if sum(map(by_error, filter(long_segment, segments))) <= tol:
+                    level += 1
+                    phase1 = True
+                else:
+                    a, b, _, _, lvl = _pop_last_where(long_segment, segments)
+                    _insort_bisected(segments, f, a, b, lvl + 1)
+
+        if sum(map(by_error, segments)) > tol:
+            print_nonconvergence_warning()
+        return sum(map(by_integral, segments))
+
+    return wrapper
+
+
+def _pop_last_where(function, collection):
+    return collection.pop(
+        next(filter(lambda e: function(e[1]), reversed(list(enumerate(collection)))))[0])
