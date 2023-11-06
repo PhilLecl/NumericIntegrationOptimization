@@ -25,8 +25,8 @@ def global_adaptive(n):
     return util.orderab(util.global_adaptive(partial(gauss_kronrod, n=n)))
 
 
-def global_adaptive_wynn(n):
-    return util.orderab(util.global_adaptive_wynn(partial(gauss_kronrod, n=n)))
+def global_adaptive_extrapolation(n):
+    return util.orderab(util.global_adaptive_extrapolation(partial(gauss_kronrod, n=n)))
 
 
 def local_adaptive(n):

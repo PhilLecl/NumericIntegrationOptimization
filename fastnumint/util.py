@@ -115,9 +115,8 @@ def _segment(segcount=2):
 def local_adaptive(integrate):
     """
     A decorator for making a function locally adaptive.
-    Takes a function `integrate: (f, a, b)->(a, b, integral_estimate, error_estimate)`
-    that integrates `f` from `a` to `b`
-    and returns `a`, `b` and estimates for the integral and error.
+    Takes a function `integrate: (f, a, b)->(integral_estimate, error_estimate)`
+    that integrates `f` from `a` to `b` and returns estimates for the integral and error.
     Constructs a function `(f, a, b, tol, maxdepth)->float` that integrates `f` from `a` to `b`
     by bisecting each segment until its tolerance is low enough
     or a maximum recursion depth is reached.
@@ -168,7 +167,15 @@ def global_adaptive(integrate):
     return wrapper
 
 
-def global_adaptive_wynn(integrate):
+def global_adaptive_extrapolation(integrate):
+    """
+    A decorator for applying the adaptive extrapolation algorithm from
+    de Doncker 1978 (https://doi.org/10.1145/1053402.1053403).
+    Takes a function `integrate: (f, a, b)->(integral_estimate, error_estimate)`
+    that integrates `f` from `a` to `b` and returns estimates for the integral and error.
+    Constructs a function `(f, a, b, tol, maxdepth)->float` that integrates `f` from `a` to `b`
+    using the algorithm outlined in the reference above.
+    """
     by_integral = lambda e: e[2]
     by_error = lambda e: e[3]
 
@@ -215,6 +222,13 @@ def global_adaptive_wynn(integrate):
     return wrapper
 
 
-def _pop_last_where(function, collection):
+def _pop_last_where(predicate, collection):
+    """
+    Pops the last element which fulfills a predicate from a collection.
+
+    :param predicate: A predicate function for filtering elements.
+    :param collection: The collection to pop the element from.
+    :return: The popped element.
+    """
     return collection.pop(
-        next(filter(lambda e: function(e[1]), reversed(list(enumerate(collection)))))[0])
+        next(filter(lambda e: predicate(e[1]), reversed(list(enumerate(collection)))))[0])

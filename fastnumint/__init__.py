@@ -1,8 +1,6 @@
-from .gauss_quadrature.gauss_kronrod import global_adaptive as gagk, local_adaptive as lagk, \
-    global_adaptive_wynn as gaegk
-from .gauss_quadrature.gauss_legendre import iterative as igl, local_adaptive as lagl
-from .newton_cotes import *
+from fastnumint import newton_cotes
+from fastnumint.gauss_quadrature import gauss_kronrod, gauss_legendre
 
 
 def int_num(f, a, b, tol=1e-4, maxiter=1000):
-    return gaegk(21)(f, a, b, tol, maxiter)
+    return gauss_kronrod.global_adaptive_extrapolation(21)(f, a, b, tol, maxiter)
