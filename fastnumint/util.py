@@ -153,7 +153,7 @@ def global_adaptive(integrate):
 
             # bisect the segment with the largest error (the last segment)
             # and insert the new segments at the appropriate places
-            a, b, _, _ = segments.pop(-1)
+            a, b, _, _ = segments.pop()
             m = (a + b) / 2
             insort(segments, integrate(f, a, m), key=by_error)
             insort(segments, integrate(f, m, b), key=by_error)
