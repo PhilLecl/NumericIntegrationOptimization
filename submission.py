@@ -409,6 +409,6 @@ def int_num(f, a, b, tol=1e-4, maxiter=1000):
         # update sum of errors
         errsum += l[0] + r[0] - err
 
-    if errsum > tol:  # haven't checked after last bisection yet
+    if errsum > tol:  # haven't checked after the last bisection yet
         print_nonconvergence_warning()
     return sum(I for _, I, _, _ in segments)
