@@ -1,9 +1,8 @@
 """This is what I submitted for the class, because it was fastest based on my testing"""
 
-from heapq import heappop, heappush  # ever so slightly faster than bisect.insort and list.pop
-
+# Gauss-Kronrod roots (https://www.advanpix.com/2011/11/07/gauss-kronrod-quadrature-nodes-weights/)
 gk_roots = {
-    # kronrod_degree: [
+    # number_of_points: [
     #     (x, kronrod_weight, gauss_weight),
     #     ...
     # ],
@@ -349,10 +348,10 @@ gk_roots = {
     ],
 }
 
+from heapq import heappop, heappush  # ever so slightly faster than bisect.insort and list.pop
+
 num_points = 21
 _roots = gk_roots[num_points]
-by_integral = lambda seg: seg[1]
-by_error = lambda seg: seg[0]
 
 
 def print_nonconvergence_warning():
@@ -364,19 +363,39 @@ def print_nonconvergence_warning():
 
 
 def gauss_kronrod(f, a, b):
+    """
+    Integrates `f` from `a` to `b` and estimates the error using Gauss-Kronrod quadrature.
+
+    :param f: The function to be integrated
+    :param a: The lower end of the integration interval
+    :param b: The upper end of the integration interval
+    :return: A tuple (error_estimate, integral_estimate)
+    """
     scaling = (b - a) / 2
     midpoint = (a + b) / 2
     nodes = [f(scaling * x + midpoint) for x, _, _ in _roots]
     gauss = sum(fx * wg for fx, (_, _, wg) in zip(nodes, _roots) if wg) * scaling
     kronrod = sum(fx * wk for fx, (_, wk, _) in zip(nodes, _roots)) * scaling
-    return -abs(kronrod - gauss), kronrod  # this format enables heapq compatibility
+    return -abs(kronrod - gauss), kronrod  # this format allows heapq compatibility
 
 
 def int_num(f, a, b, tol=1e-4, maxiter=1000):
+    """
+    Integrates a function by splitting it into segments and iteratively bisecting the segment with
+    the largest error until the error-sum is below a specified tolerance or a maximum number of
+    iterations is reached.
+
+    :param f: The function to be integrated
+    :param a: The lower bound of the integration-interval
+    :param b: The upper bound of the integration-interval
+    :param tol: The maximum error-tolerance for the returned integral-estimate
+    :param maxiter: The maximum number of iterations
+    :return: An estimate for the integral of f from a to b
+    """
     segments = [(*gauss_kronrod(f, a, b), a, b)]
     for i in range(maxiter):
-        if -sum(map(by_error, segments)) <= tol:
-            return sum(map(by_integral, segments))
+        if -sum(err for err, _, _, _ in segments) <= tol:
+            return sum(I for _, I, _, _ in segments)
 
         # bisect the segment with the largest error
         _, _, a, b = heappop(segments)
@@ -384,6 +403,6 @@ def int_num(f, a, b, tol=1e-4, maxiter=1000):
         heappush(segments, (*gauss_kronrod(f, a, m), a, m))
         heappush(segments, (*gauss_kronrod(f, m, b), m, b))
 
-    if -sum(map(by_error, segments)) > tol:
+    if -sum(err for err, _, _, _ in segments) > tol:
         print_nonconvergence_warning()
-    return sum(map(by_integral, segments))
+    return sum(I for _, I, _, _ in segments)
