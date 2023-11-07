@@ -1,7 +1,7 @@
 import pytest
 from scipy import integrate
 from fastnumint import int_num
-from tests.functions import *
+from .functions import *
 from .de_doncker import TEST_CASES as DE_DONCKER_TESTS
 
 MY_TESTS = (('f', 'a', 'b', 'tol', 'maxiter'), (
