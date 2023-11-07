@@ -403,6 +403,6 @@ def int_num(f, a, b, tol=1e-4, maxiter=1000):
         insort(segments, (*gauss_kronrod(f, a, m), a, m))
         insort(segments, (*gauss_kronrod(f, m, b), m, b))
 
-    if sum(err for err, _, _, _ in segments) > tol:
+    if sum(err for err, _, _, _ in segments) > tol:  # haven't checked after last bisection yet
         print_nonconvergence_warning()
     return sum(I for _, I, _, _ in segments)
