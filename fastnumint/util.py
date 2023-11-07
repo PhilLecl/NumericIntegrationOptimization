@@ -124,7 +124,7 @@ def local_adaptive(integrate):
     """
 
     def wrapper(f, a, b, tol, maxdepth):
-        whole, err = integrate(f, a, b)
+        err, whole = integrate(f, a, b)
         if not maxdepth or err <= tol:
             return whole
         m = (a + b) / 2
@@ -137,32 +137,29 @@ def local_adaptive(integrate):
 def global_adaptive(integrate):
     """
     A decorator for making a function globally adaptive.
-    Takes a function `integrate: (f, a, b)->(a, b, integral_estimate, error_estimate)`
-    that integrates `f` from `a` to `b`
-    and returns `a`, `b` and estimates for the integral and error.
+    Takes a function `integrate: (f, a, b)->(error_estimate, integral_estimate)`
+    that integrates `f` from `a` to `b`.
     Constructs a function `(f, a, b, tol, maxiter)->float` that integrates `f` from `a` to `b`
     by iteratively bisecting the segment with the largest error-estimate
     until the sum of error-estimates is `<=tol` or `maxiter` iterations have been reached.
     """
-    by_integral = lambda e: e[2]
-    by_error = lambda e: e[3]
 
     def wrapper(f, a, b, tol, maxiter):
-        segments = [(a, b, *integrate(f, a, b))]
+        segments = [(*integrate(f, a, b), a, b)]
         for i in range(maxiter):
-            if sum(map(by_error, segments)) <= tol:
-                return sum(map(by_integral, segments))
+            if sum(err for err, _, _, _ in segments) <= tol:
+                return sum(I for _, I, _, _ in segments)
 
             # bisect the segment with the largest error (the last segment)
             # and insert the new segments at the appropriate places
-            a, b, _, _ = segments.pop()
+            _, _, a, b = segments.pop()
             m = (a + b) / 2
-            insort(segments, (a, m, *integrate(f, a, m)), key=by_error)
-            insort(segments, (m, b, *integrate(f, m, b)), key=by_error)
+            insort(segments, (*integrate(f, a, m), a, m))
+            insort(segments, (*integrate(f, m, b), m, b))
 
-        if sum(map(by_error, segments)) > tol:
+        if sum(err for err, _, _, _ in segments) > tol:
             print_nonconvergence_warning()
-        return sum(map(by_integral, segments))
+        return sum(I for _, I, _, _ in segments)
 
     return wrapper
 
@@ -171,29 +168,27 @@ def global_adaptive_extrapolation(integrate):
     """
     A decorator for applying the adaptive extrapolation algorithm from
     de Doncker 1978 (https://doi.org/10.1145/1053402.1053403).
-    Takes a function `integrate: (f, a, b)->(integral_estimate, error_estimate)`
-    that integrates `f` from `a` to `b` and returns estimates for the integral and error.
+    Takes a function `integrate: (f, a, b)->(error_estimate, integral_estimate)`
+    that integrates `f` from `a` to `b`.
     Constructs a function `(f, a, b, tol, maxdepth)->float` that integrates `f` from `a` to `b`
     using the algorithm outlined in the reference above.
     """
-    by_integral = lambda e: e[2]
-    by_error = lambda e: e[3]
 
     def _insort_bisected(segments, f, a, b, level):
         m = (a + b) / 2
-        insort(segments, (a, m, *integrate(f, a, m), level), key=by_error)
-        insort(segments, (m, b, *integrate(f, m, b), level), key=by_error)
+        insort(segments, (*integrate(f, a, m), a, m, level))
+        insort(segments, (*integrate(f, m, b), m, b, level))
 
     def wrapper(f, a, b, tol, maxiter):
         iteration = level = 0
         wynn = WynnEpsilon()
-        segments = [(a, b, *integrate(f, a, b), level)]
-        while sum(map(by_error, segments)) > tol:
+        segments = [(*integrate(f, a, b), a, b, level)]
+        while sum(err for err, _, _, _, _ in segments) > tol:
             if iteration >= maxiter:
                 print_nonconvergence_warning()
                 break
 
-            a, b, _, _, lvl = segments[-1]
+            _, _, a, b, lvl = segments[-1]
             if lvl < level:
                 # bisect the segment with the largest error
                 del segments[-1]
@@ -204,20 +199,20 @@ def global_adaptive_extrapolation(integrate):
                 # decrease the error of the larger segments first
                 long_segment = lambda seg: seg[4] < level
                 while iteration < maxiter and sum(
-                        map(by_error, filter(long_segment, segments))) > tol:
+                        err for err, _, _, _, _ in filter(long_segment, segments)) > tol:
                     # bisect the segment with the largest error among the 'long' segments
-                    a, b, _, _, lvl = _pop_last_where(long_segment, segments)
+                    _, _, a, b, lvl = _pop_last_where(long_segment, segments)
                     _insort_bisected(segments, f, a, b, lvl + 1)
                     iteration += 1
 
                 # perform extrapolation
-                wynn.add(sum(map(by_integral, segments)))
+                wynn.add(sum(I for _, I, _, _, _ in segments))
                 if wynn.error <= tol:
                     return wynn.extrapolation
 
                 level += 1
 
-        return sum(map(by_integral, segments))
+        return sum(I for _, I, _, _, _ in segments)
 
     return wrapper
 

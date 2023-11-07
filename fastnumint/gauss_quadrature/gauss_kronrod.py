@@ -11,14 +11,14 @@ def gauss_kronrod(f, a, b, n):
     :param a: The lower end of the integration interval
     :param b: The upper end of the integration interval
     :param n: The number of points where f is evaluated
-    :return: A tuple (a, b, integral_estimate, error_estimate)
+    :return: A tuple (error_estimate, integral_estimate)
     """
     scaling = (b - a) / 2
     midpoint = (a + b) / 2
     nodes = [f(scaling * x + midpoint) for x, _, _ in _roots[n]]
     gauss = sum(fx * wg for fx, (_, _, wg) in zip(nodes, _roots[n]) if wg) * scaling
     kronrod = sum(fx * wk for fx, (_, wk, _) in zip(nodes, _roots[n])) * scaling
-    return kronrod, abs(kronrod - gauss)
+    return abs(kronrod - gauss), kronrod  # this format allows for sorting tuples by error
 
 
 def global_adaptive(n):
