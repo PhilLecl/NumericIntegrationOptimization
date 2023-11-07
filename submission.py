@@ -393,16 +393,21 @@ def int_num(f, a, b, tol=1e-4, maxiter=1000):
     :return: An estimate for the integral of f from a to b
     """
     segments = [(*gauss_kronrod(f, a, b), a, b)]
+    # storing the sum of errors is slightly faster than computing it on-the-fly
+    errsum = segments[0][0]
     for i in range(maxiter):
-        if sum(err for err, _, _, _ in segments) <= tol:
+        if errsum <= tol:
             return sum(I for _, I, _, _ in segments)
 
         # bisect the segment with the largest error
-        _, _, a, b = segments.pop()
+        err, _, a, b = segments.pop()
         m = (a + b) / 2
-        insort(segments, (*gauss_kronrod(f, a, m), a, m))
-        insort(segments, (*gauss_kronrod(f, m, b), m, b))
+        l, r = (*gauss_kronrod(f, a, m), a, m), (*gauss_kronrod(f, m, b), m, b)  # new segments
+        errsum += l[0] + r[0] - err  # update sum of errors
+        # insert new segments at appropriate places
+        insort(segments, l)
+        insort(segments, r)
 
-    if sum(err for err, _, _, _ in segments) > tol:  # haven't checked after last bisection yet
+    if errsum > tol:  # haven't checked after last bisection yet
         print_nonconvergence_warning()
     return sum(I for _, I, _, _ in segments)
