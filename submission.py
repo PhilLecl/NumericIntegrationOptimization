@@ -392,23 +392,22 @@ def int_num(f, a, b, tol=1e-4, maxiter=1000):
     :param maxiter: The maximum number of iterations
     :return: An estimate for the integral of f from a to b
     """
-    segments = [(*gauss_kronrod(f, a, b), a, b)]
-    # storing the sum of errors appears to be slightly faster than computing it on-the-fly
-    errsum = segments[0][0]
+    segments = [(*gauss_kronrod(f, a, b), a, b)]  # each segment is a tuple (error, integral, a, b)
+    errsum = segments[0][0]  # manual updates are slightly faster than recomputing on-the-fly
+    if errsum <= tol:
+        return sum(I for _, I, _, _ in segments)
     for i in range(maxiter):
+        # bisect the segment with the largest error (= the last element)
+        err, _, a, b = segments.pop()
+        m = (a + b) / 2  # midpoint of the segment
+        left, right = (*gauss_kronrod(f, a, m), a, m), (*gauss_kronrod(f, m, b), m, b)
+        # insert the new segments while keeping the list sorted by ascending error
+        insort(segments, left)
+        insort(segments, right)
+        # update sum of errors and check for convergence
+        errsum += left[0] + right[0] - err
         if errsum <= tol:
             return sum(I for _, I, _, _ in segments)
-
-        # bisect the segment with the largest error
-        err, _, a, b = segments.pop()
-        m = (a + b) / 2
-        l, r = (*gauss_kronrod(f, a, m), a, m), (*gauss_kronrod(f, m, b), m, b)
-        # insert new segments at appropriate places
-        insort(segments, l)
-        insort(segments, r)
-        # update sum of errors
-        errsum += l[0] + r[0] - err
-
-    if errsum > tol:  # haven't checked after the last bisection yet
-        print_nonconvergence_warning()
+    # no convergence within maxiter iterations
+    print_nonconvergence_warning()
     return sum(I for _, I, _, _ in segments)
