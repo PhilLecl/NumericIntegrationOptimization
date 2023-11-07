@@ -142,6 +142,9 @@ def global_adaptive(integrate):
     Constructs a function `(f, a, b, tol, maxiter)->float` that integrates `f` from `a` to `b`
     by iteratively bisecting the segment with the largest error-estimate
     until the sum of error-estimates is `<=tol` or `maxiter` iterations have been reached.
+
+    Could be slightly accelerated by using heapq instead of insort,
+    but that would cause incompatibilities with `global_adaptive_extrapolation`.
     """
 
     def wrapper(f, a, b, tol, maxiter):
