@@ -385,6 +385,8 @@ def int_num(f, a, b, tol=1e-4, maxiter=1000):
     the largest error until the error-sum is below a specified tolerance or a maximum number of
     iterations is reached.
 
+    Uses heapq to quickly access the segment with the largest error.
+
     :param f: The function to be integrated
     :param a: The lower bound of the integration-interval
     :param b: The upper bound of the integration-interval
