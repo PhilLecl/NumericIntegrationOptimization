@@ -348,7 +348,7 @@ gk_roots = {
     ],
 }
 
-from heapq import heappop, heappush  # ever so slightly faster than bisect.insort and list.pop
+from bisect import insort  # can't really tell if heapq is slower or faster
 
 num_points = 21
 _roots = gk_roots[num_points]
@@ -376,7 +376,7 @@ def gauss_kronrod(f, a, b):
     nodes = [f(scaling * x + midpoint) for x, _, _ in _roots]
     gauss = sum(fx * wg for fx, (_, _, wg) in zip(nodes, _roots) if wg) * scaling
     kronrod = sum(fx * wk for fx, (_, wk, _) in zip(nodes, _roots)) * scaling
-    return -abs(kronrod - gauss), kronrod  # this format allows heapq compatibility
+    return abs(kronrod - gauss), kronrod  # this order allows easily sorting segments by error
 
 
 def int_num(f, a, b, tol=1e-4, maxiter=1000):
@@ -384,8 +384,6 @@ def int_num(f, a, b, tol=1e-4, maxiter=1000):
     Integrates a function by splitting it into segments and iteratively bisecting the segment with
     the largest error until the error-sum is below a specified tolerance or a maximum number of
     iterations is reached.
-
-    Uses heapq to quickly access the segment with the largest error.
 
     :param f: The function to be integrated
     :param a: The lower bound of the integration-interval
@@ -396,15 +394,15 @@ def int_num(f, a, b, tol=1e-4, maxiter=1000):
     """
     segments = [(*gauss_kronrod(f, a, b), a, b)]
     for i in range(maxiter):
-        if -sum(err for err, _, _, _ in segments) <= tol:
+        if sum(err for err, _, _, _ in segments) <= tol:
             return sum(I for _, I, _, _ in segments)
 
         # bisect the segment with the largest error
-        _, _, a, b = heappop(segments)
+        _, _, a, b = segments.pop()
         m = (a + b) / 2
-        heappush(segments, (*gauss_kronrod(f, a, m), a, m))
-        heappush(segments, (*gauss_kronrod(f, m, b), m, b))
+        insort(segments, (*gauss_kronrod(f, a, m), a, m))
+        insort(segments, (*gauss_kronrod(f, m, b), m, b))
 
-    if -sum(err for err, _, _, _ in segments) > tol:
+    if sum(err for err, _, _, _ in segments) > tol:
         print_nonconvergence_warning()
     return sum(I for _, I, _, _ in segments)
