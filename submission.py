@@ -394,20 +394,19 @@ def int_num(f, a, b, tol=1e-4, maxiter=1000):
     """
     segments = [(*gauss_kronrod(f, a, b), a, b)]  # each segment is a tuple (error, integral, a, b)
     errsum = segments[0][0]  # manual updates are slightly faster than recomputing on-the-fly
-    if errsum <= tol:
-        return sum(I for _, I, _, _ in segments)
-    for i in range(maxiter):
-        # bisect the segment with the largest error (= the last element)
-        err, _, a, b = segments.pop()
-        m = (a + b) / 2  # midpoint of the segment
-        left, right = (*gauss_kronrod(f, a, m), a, m), (*gauss_kronrod(f, m, b), m, b)
-        # insert the new segments while keeping the list sorted by ascending error
-        insort(segments, left)
-        insort(segments, right)
-        # update sum of errors and check for convergence
-        errsum += left[0] + right[0] - err
-        if errsum <= tol:
-            return sum(I for _, I, _, _ in segments)
-    # no convergence within maxiter iterations
-    print_nonconvergence_warning()
+    if errsum > tol:
+        for i in range(maxiter):
+            # bisect the segment with the largest error (= the last element)
+            err, _, a, b = segments.pop()
+            m = (a + b) / 2  # midpoint of the segment
+            left, right = (*gauss_kronrod(f, a, m), a, m), (*gauss_kronrod(f, m, b), m, b)
+            # insert the new segments while keeping the list sorted by ascending error
+            insort(segments, left)
+            insort(segments, right)
+            # update sum of errors and check for convergence
+            errsum += left[0] + right[0] - err
+            if errsum <= tol:
+                break
+        else:  # slightly cursed Python syntax for "no break occurred" (= no convergence)
+            print_nonconvergence_warning()
     return sum(I for _, I, _, _ in segments)
