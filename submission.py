@@ -1,5 +1,4 @@
 """This is what I submitted for the class, because it was fastest based on my testing"""
-from itertools import chain, repeat
 
 # Gauss-Kronrod roots (https://www.advanpix.com/2011/11/07/gauss-kronrod-quadrature-nodes-weights/)
 gk_roots = {
@@ -349,8 +348,9 @@ gk_roots = {
     ],
 }
 
-# bisect is an inbuilt module
+# bisect and itertools are inbuilt modules
 from bisect import insort
+from itertools import chain, repeat
 # from heapq import heappop, heappush  # can't really tell if bisect or heapq is faster
 
 
@@ -369,6 +369,7 @@ def gauss_kronrod(f, a, b, pts):
     :param f: The function to be integrated
     :param a: The lower end of the integration interval
     :param b: The upper end of the integration interval
+    :param pts: The number of points to evaluate f at
     :return: A tuple (error_estimate, integral_estimate)
     """
     scaling = (b - a) / 2
