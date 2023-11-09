@@ -1,4 +1,5 @@
 """This is what I submitted for the class, because it was fastest based on my testing"""
+from itertools import chain, repeat
 
 # Gauss-Kronrod roots (https://www.advanpix.com/2011/11/07/gauss-kronrod-quadrature-nodes-weights/)
 gk_roots = {
@@ -352,9 +353,6 @@ gk_roots = {
 from bisect import insort
 # from heapq import heappop, heappush  # can't really tell if bisect or heapq is faster
 
-num_points = 21  # depending on f, different values are best; 21 appears to be a good balance
-_roots = gk_roots[num_points]
-
 
 def print_nonconvergence_warning():
     print('----------------------------------')
@@ -364,7 +362,7 @@ def print_nonconvergence_warning():
     print()
 
 
-def gauss_kronrod(f, a, b):
+def gauss_kronrod(f, a, b, pts):
     """
     Integrates `f` from `a` to `b` and estimates the error using Gauss-Kronrod quadrature.
 
@@ -375,9 +373,9 @@ def gauss_kronrod(f, a, b):
     """
     scaling = (b - a) / 2
     midpoint = (a + b) / 2
-    nodes = [f(scaling * x + midpoint) for x, _, _ in _roots]
-    gauss = sum(fx * wg for fx, (_, _, wg) in zip(nodes, _roots) if wg) * scaling
-    kronrod = sum(fx * wk for fx, (_, wk, _) in zip(nodes, _roots)) * scaling
+    nodes = [f(scaling * x + midpoint) for x, _, _ in gk_roots[pts]]
+    gauss = sum(fx * wg for fx, (_, _, wg) in zip(nodes, gk_roots[pts]) if wg) * scaling
+    kronrod = sum(fx * wk for fx, (_, wk, _) in zip(nodes, gk_roots[pts])) * scaling
     return abs(kronrod - gauss), kronrod  # this order allows easily sorting segments by error
 
 
@@ -394,14 +392,16 @@ def int_num(f, a, b, tol=1e-4, maxiter=1000):
     :param maxiter: The maximum number of iterations
     :return: An estimate for the integral of f from a to b
     """
-    segments = [(*gauss_kronrod(f, a, b), a, b)]  # each segment is a tuple (error, integral, a, b)
+    segments = [
+        (*gauss_kronrod(f, a, b, 21), a, b)]  # each segment is a tuple (error, integral, a, b)
     errsum = segments[0][0]  # manual updates are slightly faster than recomputing on-the-fly
     if errsum > tol:
-        for i in range(maxiter):
+        for i, pts in zip(range(maxiter), chain([41], repeat(21))):
             # bisect the segment with the largest error (= the last element)
             err, _, a, b = segments.pop()
             m = (a + b) / 2  # midpoint of the segment
-            left, right = (*gauss_kronrod(f, a, m), a, m), (*gauss_kronrod(f, m, b), m, b)
+            left, right = (*gauss_kronrod(f, a, m, pts), a, m), (
+                *gauss_kronrod(f, m, b, pts), m, b)
             # insert the new segments while keeping the list sorted by ascending error
             insort(segments, left)
             insort(segments, right)
