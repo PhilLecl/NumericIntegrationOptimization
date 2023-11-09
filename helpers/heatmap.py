@@ -43,8 +43,8 @@ def generate_heatmap(runs: list[str], prop: str, group_by: str, color_scale: str
     sns.heatmap(sdata, annot=data, cbar=(not individual_groups), norm=norm,
                 cmap=sns.color_palette('rocket_r', as_cmap=True),
                 xticklabels=1, yticklabels=1)
-    plt.savefig(outpath, bbox_inches='tight')
-    plt.close()
+    #plt.savefig(outpath, bbox_inches='tight')
+    plt.show()
 
 
 if __name__ == '__main__':
