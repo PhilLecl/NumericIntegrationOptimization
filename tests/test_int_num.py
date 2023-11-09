@@ -1,3 +1,5 @@
+from typing import Callable
+
 import pytest
 from scipy import integrate
 from fastnumint import int_num
@@ -37,6 +39,14 @@ MY_TESTS = (('f', 'a', 'b', 'tol', 'maxiter'), (
 ))
 
 
+def format_param(val):
+    if isinstance(val, float):
+        return f'{val:.2g}'
+    elif isinstance(val, Callable):
+        return val.__name__
+    return str(val)
+
+
 def test_original(benchmark):
     """The test case originially supplied in the class"""
     f, a, b, tol, maxiter = psi_harm, -5, 5, 1e-8, 1000
@@ -45,7 +55,7 @@ def test_original(benchmark):
     assert abs(my_result - scipy_result[0]) <= tol
 
 
-@pytest.mark.parametrize(*MY_TESTS)
+@pytest.mark.parametrize(*MY_TESTS, ids=format_param)
 def test_custom(benchmark, f, a, b, tol, maxiter):
     """A couple of test cases I made up"""
     my_result = benchmark(int_num, f, a, b, tol, maxiter)
@@ -64,7 +74,7 @@ def test_tan(benchmark):
 @pytest.mark.parametrize(('f', 'a', 'b', 'tol', 'maxiter'), (
         (p50, -1, 1, 1e-8, 1000),
         (p50, 0, -1, 1e-8, 1000)
-))
+), ids=format_param)
 def test_p50(benchmark, f, a, b, tol, maxiter):
     """Polynomial of degree 50 as edge case because it's a rare application."""
     my_result = benchmark(int_num, f, a, b, tol, maxiter)
@@ -72,7 +82,7 @@ def test_p50(benchmark, f, a, b, tol, maxiter):
     assert abs(my_result - scipy_result[0]) <= tol
 
 
-@pytest.mark.parametrize(*DE_DONCKER_TESTS)
+@pytest.mark.parametrize(*DE_DONCKER_TESTS, ids=format_param)
 def test_de_doncker(benchmark, f, w, alpha, beta, a, b, tol, maxiter):
     """Test cases from [de Doncker 1978] (https://doi.org/10.1145/1053402.1053403)"""
     fw = lambda x: f(x) * w(x, alpha, beta)
