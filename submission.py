@@ -348,7 +348,9 @@ gk_roots = {
     ],
 }
 
-from bisect import insort  # can't really tell if heapq is slower or faster
+# bisect is an inbuilt module
+from bisect import insort
+# from heapq import heappop, heappush  # can't really tell if bisect or heapq is faster
 
 num_points = 21  # depending on f, different values are best; 21 appears to be a good balance
 _roots = gk_roots[num_points]
