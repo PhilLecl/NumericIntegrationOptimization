@@ -350,7 +350,7 @@ gk_roots = {
 
 # bisect and itertools are inbuilt modules
 from bisect import insort
-from itertools import chain, repeat
+from itertools import chain, repeat, islice
 # from heapq import heappop, heappush  # can't really tell if bisect or heapq is faster
 
 
@@ -397,7 +397,7 @@ def int_num(f, a, b, tol=1e-4, maxiter=1000):
         (*gauss_kronrod(f, a, b, 21), a, b)]  # each segment is a tuple (error, integral, a, b)
     errsum = segments[0][0]  # manual updates are slightly faster than recomputing on-the-fly
     if errsum > tol:
-        for i, pts in zip(range(maxiter), chain([41], repeat(21))):
+        for pts in islice(chain([41], repeat(21)), maxiter):
             # bisect the segment with the largest error (= the last element)
             err, _, a, b = segments.pop()
             m = (a + b) / 2  # midpoint of the segment

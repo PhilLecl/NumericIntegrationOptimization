@@ -48,7 +48,7 @@ def format_param(val):
 
 
 def test_original(benchmark):
-    """The test case originially supplied in the class"""
+    """The test case originally supplied in the class"""
     f, a, b, tol, maxiter = psi_harm_sq, -5, 5, 1e-8, 1000
     my_result = benchmark(int_num, f, a, b, tol, maxiter)
     scipy_result = integrate.quad(f, a, b)
@@ -99,3 +99,8 @@ def test_challenging():
     my_result = int_num(f, a, b, tol, maxiter)
     solution = 0.323367431677778761399370087952170446651046625725469661681036443
     assert abs(my_result - solution) <= tol
+
+
+def test_nonconvergence(capfd):
+    int_num(psi_harm_sq, 0, 1, 0, 10)  # can't converge
+    assert 'WARNING: maxiter was reached' in capfd.readouterr()[0]
