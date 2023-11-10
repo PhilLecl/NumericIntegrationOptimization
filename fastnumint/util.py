@@ -153,22 +153,21 @@ def global_adaptive(integrate):
     def wrapper(f, a, b, tol, maxiter):
         segments = [(*integrate(f, a, b), a, b)]  # each segment is a tuple (error, integral, a, b)
         errsum = segments[0][0]  # manual updates are slightly faster than recomputing on-the-fly
-        if errsum <= tol:
-            return sum(I for _, I, _, _ in segments)
-        for i in range(maxiter):
-            # bisect the segment with the largest error (= the last element)
-            err, _, a, b = segments.pop()
-            m = (a + b) / 2  # midpoint of the segment
-            left, right = (*integrate(f, a, m), a, m), (*integrate(f, m, b), m, b)
-            # insert the new segments while keeping the list sorted by ascending error
-            insort(segments, left)
-            insort(segments, right)
-            # update sum of errors and check for convergence
-            errsum += left[0] + right[0] - err
-            if errsum <= tol:
-                return sum(I for _, I, _, _ in segments)
-        # no convergence within maxiter iterations
-        print_nonconvergence_warning()
+        if errsum > tol:
+            for i in range(maxiter):
+                # bisect the segment with the largest error (= the last element)
+                err, _, a, b = segments.pop()
+                m = (a + b) / 2  # midpoint of the segment
+                left, right = (*integrate(f, a, m), a, m), (*integrate(f, m, b), m, b)
+                # insert the new segments while keeping the list sorted by ascending error
+                insort(segments, left)
+                insort(segments, right)
+                # update sum of errors and check for convergence
+                errsum += left[0] + right[0] - err
+                if errsum <= tol:
+                    break
+            else:  # slightly cursed Python syntax for "no break occurred" (= no convergence)
+                print_nonconvergence_warning()
         return sum(I for _, I, _, _ in segments)
 
     return wrapper
